@@ -31,23 +31,23 @@ const userSchema = new Schema({
     coverImage: {
         type: String, //cloudinary url
     },
-    watchHistory: {
+    watchHistory: [{
         type: Schema.Types.ObjectId,
         ref: 'video'
-    },
+    }],
     password: {
         type: String,
         required: [true, 'Password is reuired'] //hashed password
     },
     refreshToken: {
-        type: String //hahed refresh token acts like a key to generate access token
+        type: String //hashed refresh token acts like a key to generate access token
     }
 }, { timestamps: true })
 
 userSchema.pre("save", async function(next) {
     if (!this.isModified("password")) return next();
 
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
@@ -70,7 +70,7 @@ userSchema.methods.generateAceessToken = function() {
 
 userSchema.methods.generateRefreshToken = function() {
     return jwt.sign({
-            _id: this_id
+            _id: this._id
         },
         process.env.REFRESH_TOKEN_SECRET, {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
