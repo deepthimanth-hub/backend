@@ -37,7 +37,7 @@ const userSchema = new Schema({
     }],
     password: {
         type: String,
-        required: [true, 'Password is reuired'] //hashed password
+        required: [true, 'Password is required'] //hashed password
     },
     refreshToken: {
         type: String //hashed refresh token acts like a key to generate access token
@@ -82,4 +82,4 @@ export const User = mongoose.model('User', userSchema)
 
 //'User' is name of the collection used internally by mongodb.
 // variable user is the name of the model we use it in backend.
-// internal name of collectopn is not used by us but its a good practice to name both of them same.
+// internal name of collection is not used by us but its a good practice to name both of them same.

@@ -28,7 +28,7 @@ import userRouter from "./routes/user.routes.js"
 //routers declaration
 app.use("/api/v1/users", userRouter)
 
-//  http://localhost:8000/api/v1/users/register
+//  http://127.0.0.1:8000/api/v1/users/register
 // additional v1 is added to route to make future version like v2 without breaking existing routes
 
 export { app };
