@@ -1,0 +1,40 @@
+$kind: http-request
+name: register
+url: http://127.0.0.1:8000/api/v1/users/register
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: fullname
+      value: backend
+      description: ""
+      disabled: false
+    - type: text
+      key: email
+      value: h4ck@,com
+      description: ""
+      disabled: false
+    - type: text
+      key: password
+      value: "12345678"
+      description: ""
+      disabled: false
+    - type: text
+      key: username
+      value: h4cker
+      description: ""
+      disabled: false
+    - type: file
+      key: avatar
+      src:
+        - /C:/Users/fando/gem/nexa/megumi.png
+      description: ""
+      disabled: false
+    - type: file
+      key: coverImage
+      src:
+        - /C:/Users/fando/gem/nexa/deku.jpg
+      description: ""
+      disabled: false
+order: 1783359247649

@@ -31,7 +31,16 @@ const registerUser = asyncHandler(async(req, res) => {
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    // here we are not throwing error as it is not a required field,but if cover image is given ,still the above code believes file is provided
+    // so it better to check manually 
+
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
+
+    //[0]-> contains path
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is missing")
@@ -39,6 +48,7 @@ const registerUser = asyncHandler(async(req, res) => {
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
 
     if(!avatar) {
         throw new ApiError(400, "Avatar file is required")
