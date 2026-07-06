@@ -22,7 +22,7 @@ const registerUser = asyncHandler(async(req, res) => {
     if ([fullname, email, username, password].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required")
     }
-    const existedUser = user.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -62,8 +62,13 @@ const registerUser = asyncHandler(async(req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(200, "user registered Successfully")
+        new ApiResponse(200,createdUser, "user registered Successfully")
     )
+    console.log("req.files:", req.files);
+    console.log("Avatar Path:", avatarLocalPath);
+    console.log("Cover Path:", coverImageLocalPath);
+   
 })
+
 
 export { registerUser }
