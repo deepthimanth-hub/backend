@@ -4,6 +4,22 @@ import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 
+const generateAccessAndRefreshTokens = async(userId) => {
+    try{
+        const user = await User.findById(userId)
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+        
+        user.refreshToken = refreshToken
+        user.save({validateBeforSave:false})
+
+        return {accessToken,refreshToken}
+
+    } catch(error) {
+        throw new ApiError(500,"Something went wrong while generating refresh and access token")
+    }
+}
+
 
 const registerUser = asyncHandler(async(req, res) => {
     // get user details from frontend
@@ -22,6 +38,7 @@ const registerUser = asyncHandler(async(req, res) => {
     if ([fullname, email, username, password].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required")
     }
+
     const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
@@ -80,5 +97,45 @@ const registerUser = asyncHandler(async(req, res) => {
    
 })
 
+const loginUser = asyncHandler(async(req,res) => {
+    //req body -> data
+    //username or email
+    //find user in db
+    //if user not found -> thorw error
+    // if found -> check password with hashed password in db
+    //if password not match -> throw error
+    //if match -> generate access token and refresh token
+    // send to user using cookie
 
-export { registerUser }
+    const {email,username,password} = req.body
+    if(!email || !username) {
+        throw new ApiError(400,"email or username is required")
+    }
+    
+    const user = await User.findOne({
+        $or: [{email},{username}]
+    })
+    
+    // User -> denotes database model of users
+    // user -> dentoes the user object fetched from database
+    // both are not same
+
+    if(!user) {
+        throw new ApiError(404,"user not found")
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password)
+
+     // user is fetched from database
+
+    if (!isPasswordValid) {
+        throw new ApiError(401,"Invalid Credentials")
+    }
+
+    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+})
+
+
+export { registerUser, loginUser }
