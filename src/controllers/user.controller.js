@@ -79,6 +79,7 @@ const registerUser = asyncHandler(async(req, res) => {
         password,
         username : username.toLowerCase()
     })
+    // user object created with id created automatically by database
 
     const createdUser = await User.findById(user._id).select(
         " -password -refreshToken"
@@ -135,7 +136,57 @@ const loginUser = asyncHandler(async(req,res) => {
     const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id)
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+    const options = {
+        httpOnly : true,
+        secure : true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(
+        new ApiResponse(200,
+            {user:loggedInUser,accessToken,refreshToken},
+            "User logged in successfully")
+    )
+})
+
+//here there is a problem with logout genrally user._id is created,
+//while someone is registering and then while login we match the email or username and password,
+// and get user._id ,email and password are given as input then only we gain thta particular user object
+// if we choose not to give email and password again as input we need to use middleware 
+// logout is done by invalidating tokens and cookies, but here without mail and password we cant access user object 
+// another error if we choose to give input of mail and password to logout there is a possibility that you can logout using others credentials(email,password) as we cant verify the credentials used to logout are also to login or not
+// so its risky to give input of credentials to logout
+
+const logoutUser = asyncHandler(async(req,res) =>{
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshToken: undefined
+            }
+        },
+        {
+            new:true
+        }
+    )
+    const options = {
+        httpOnly : true,
+        secure : true
+    }
+
+    return res
+    .status(200)
+    .clearcookie("accessToken", options)
+    .clearcookie("refreshToken",options)
+    .json(
+        new ApiResponse(200,
+            {},
+            "User logged out"))
 })
 
 
-export { registerUser, loginUser }
+export { registerUser, loginUser ,logoutUser }
