@@ -1,0 +1,5 @@
+$kind: http-request
+name: logout
+url: " http://127.0.0.1:8000/api/v1/users/logout"
+method: POST
+order: 4106828954364670

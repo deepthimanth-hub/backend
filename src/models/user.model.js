@@ -55,7 +55,7 @@ userSchema.methods.isPasswordCorrect = async function(password) {
         // compare given password(coverted into hash) and hashed password from database
 }
 
-userSchema.methods.generateAceessToken = function() {
+userSchema.methods.generateAccessToken = function() {
     return jwt.sign({
             _id: this._id,
             email: this.email,
