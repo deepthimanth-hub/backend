@@ -250,5 +250,54 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
     } 
 })
 
+const changeCurrentPassword = aynscHandler(async(req,res)=>{
+    const {oldPassword,newPassword} = req.body
+    // here we are changing password which means a user is already logged in
+    //in auth.middleware we already have user data in req.user 
+    // just import verifyjwt in routes from auth.middleware
 
-export { registerUser, loginUser ,logoutUser,refreshAccessToken }
+    const user = await User.findById(req.user?._id)
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+    if(!isPasswordCorrect) {
+        throw new ApiError(400,"Invalid old password")
+    }
+
+    user.password = newPassword
+    await user.save({validateBeforeSave:false})
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,{},"Password changed successfully"))
+})
+
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    return res
+    .status(200)
+    .json(200,req.user,"current user fetched succesfully")
+})
+
+const updateAccountDetails = asyncHandler(async(req,res)=>{
+    const {fullname, email} = req.body
+
+    if(!fullname || !email) {
+        throw new ApiError(400,"All fields are reqired")
+    }
+
+    const user = User.findByIdAndUpdate(req.user?._id,{
+        $set:{
+            fullname:fullname, // fullname ->use this
+            email:email
+            //both formats are right
+        }
+    },{new:true}).select("-password")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,user,"Account deatils updated successfully"))
+})
+
+// it will best to create a separate controller for updating image bcoz if you add it in UpdateAccountDetails,
+// even just u want to update new image it sends text data too everytime so it better to make separate controllers
+
+export { registerUser, loginUser ,logoutUser,refreshAccessToken,changeCurrentPassword,getCurrentUser,updateAccountDetails }
